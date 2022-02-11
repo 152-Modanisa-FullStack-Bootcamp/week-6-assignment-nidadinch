@@ -1,4 +1,5 @@
 {
     "initialBalanceAmount": 0,
-    "minumumBalanceAmount": -100
+    "minumumBalanceAmount": -100,
+    "serverAddr": ":8080"
 }
