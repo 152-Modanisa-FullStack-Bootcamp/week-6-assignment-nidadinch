@@ -23,25 +23,17 @@ var conf = config.Get()
 func (s *WalletsService) Wallets() (*model.WalletsResponse, error) {
 	wallets, err := s.Data.GetAllWallets()
 
-	if err != nil {
-		return nil, err
-	}
-
 	m := model.WalletsResponse{}
 	for _, v := range wallets {
 		m[v.Username] = v.Balance
 	}
 
-	return &m, nil
+	return &m, err
 }
 
 func (s *WalletsService) GetWalletByUsername(username string) (*model.WalletsResponse, error) {
 
-	wallet, err := s.Data.GetWallet(username)
-
-	if err != nil {
-		return nil, err
-	}
+	wallet, _ := s.Data.GetWallet(username)
 
 	m := model.WalletsResponse{}
 	m[wallet.Username] = wallet.Balance
@@ -49,11 +41,7 @@ func (s *WalletsService) GetWalletByUsername(username string) (*model.WalletsRes
 	return &m, nil
 }
 func (s *WalletsService) CreateWalletByUsername(username string) (*model.WalletsResponse, error) {
-	wallet, err := s.Data.AddWallet(username, conf.InitialBalanceAmount)
-
-	if err != nil {
-		return nil, err
-	}
+	wallet, _ := s.Data.AddWallet(username, conf.InitialBalanceAmount)
 
 	m := model.WalletsResponse{}
 	m[wallet.Username] = wallet.Balance
@@ -63,13 +51,10 @@ func (s *WalletsService) CreateWalletByUsername(username string) (*model.Wallets
 
 func (s *WalletsService) UpdateWalletByUsername(username string, amount int) (*model.WalletsResponse, error) {
 
-	wallet, err := s.Data.GetWallet(username)
-	if err != nil {
-		return nil, err
-	}
+	wallet, _ := s.Data.GetWallet(username)
 
 	if conf.MinumumBalanceAmount <= wallet.Balance+amount {
-		s.Data.Update(username, amount)
+		wallet, _ = s.Data.Update(username, amount)
 	} else {
 		return nil, fmt.Errorf("wallet balance can not be less than '%v'", conf.MinumumBalanceAmount)
 	}

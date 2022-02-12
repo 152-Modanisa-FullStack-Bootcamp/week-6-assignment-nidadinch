@@ -38,6 +38,7 @@ func (c *Controller) Handle(w http.ResponseWriter, r *http.Request) {
 		case param.MatchString(path):
 			c.CreateWallet(w, r)
 		default:
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("please provide a username to create a wallet"))
 		}
 	case http.MethodPost == r.Method:
@@ -45,12 +46,13 @@ func (c *Controller) Handle(w http.ResponseWriter, r *http.Request) {
 		case param.MatchString(path):
 			c.UpdateWallet(w, r)
 		default:
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("please provide a username to update the balance of wallet"))
 		}
 	}
 }
 
-func getUsernameFromPath(r *http.Request) string {
+func GetUsernameFromPath(r *http.Request) string {
 	return r.URL.Path[2:]
 }
 
@@ -74,7 +76,7 @@ func (c *Controller) Wallets(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Controller) GetWallet(w http.ResponseWriter, r *http.Request) {
-	username := getUsernameFromPath(r)
+	username := GetUsernameFromPath(r)
 	response, err := c.service.GetWalletByUsername(username)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -94,7 +96,7 @@ func (c *Controller) GetWallet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Controller) CreateWallet(w http.ResponseWriter, r *http.Request) {
-	username := getUsernameFromPath(r)
+	username := GetUsernameFromPath(r)
 
 	response, err := c.service.CreateWalletByUsername(username)
 	if err != nil {
@@ -115,7 +117,7 @@ func (c *Controller) CreateWallet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Controller) UpdateWallet(w http.ResponseWriter, r *http.Request) {
-	username := getUsernameFromPath(r)
+	username := GetUsernameFromPath(r)
 
 	// parse json body
 	decoder := json.NewDecoder(r.Body)

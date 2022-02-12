@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>controller: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">week-6-assingment-nidadinch/controller/controller.go (83.8%)</option>
+				
+				<option value="file1">week-6-assingment-nidadinch/data/data.go (100.0%)</option>
+				
+				<option value="file2">week-6-assingment-nidadinch/service/service.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package controller
+
+import (
+        "encoding/json"
+        "net/http"
+        "regexp"
+        "week-6-assingment-nidadinch/model"
+        "week-6-assingment-nidadinch/service"
+)
+
+type IController interface {
+        Wallets(w http.ResponseWriter, r *http.Request)
+        GetWallet(w http.ResponseWriter, r *http.Request)
+        Handle(w http.ResponseWriter, r *http.Request)
+        CreateWallet(w http.ResponseWriter, r *http.Request)
+        UpdateWallet(w http.ResponseWriter, r *http.Request)
+}
+
+type Controller struct {
+        service service.IWalletsService
+}
+
+var param = regexp.MustCompile(`/:`)
+
+// handle function for routing
+func (c *Controller) Handle(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        path := r.URL.Path
+        switch </span>{
+        case http.MethodGet == r.Method:<span class="cov8" title="1">
+                switch </span>{
+                case param.MatchString(path):<span class="cov8" title="1">
+                        c.GetWallet(w, r)</span>
+                default:<span class="cov8" title="1">
+                        c.Wallets(w, r)</span>
+                }
+        case http.MethodPut == r.Method:<span class="cov8" title="1">
+                switch </span>{
+                case param.MatchString(path):<span class="cov8" title="1">
+                        c.CreateWallet(w, r)</span>
+                default:<span class="cov8" title="1">
+                        w.WriteHeader(http.StatusInternalServerError)
+                        w.Write([]byte("please provide a username to create a wallet"))</span>
+                }
+        case http.MethodPost == r.Method:<span class="cov8" title="1">
+                switch </span>{
+                case param.MatchString(path):<span class="cov8" title="1">
+                        c.UpdateWallet(w, r)</span>
+                default:<span class="cov8" title="1">
+                        w.WriteHeader(http.StatusInternalServerError)
+                        w.Write([]byte("please provide a username to update the balance of wallet"))</span>
+                }
+        }
+}
+
+func GetUsernameFromPath(r *http.Request) string <span class="cov8" title="1">{
+        return r.URL.Path[2:]
+}</span>
+
+func (c *Controller) Wallets(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        response, err := c.service.Wallets()
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">json, err := json.Marshal(response)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
+        w.Write(json)</span>
+}
+
+func (c *Controller) GetWallet(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        username := GetUsernameFromPath(r)
+        response, err := c.service.GetWalletByUsername(username)
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">json, err := json.Marshal(response)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
+        w.Write(json)</span>
+}
+
+func (c *Controller) CreateWallet(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        username := GetUsernameFromPath(r)
+
+        response, err := c.service.CreateWalletByUsername(username)
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">json, err := json.Marshal(response)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
+        w.Write(json)</span>
+}
+
+func (c *Controller) UpdateWallet(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        username := GetUsernameFromPath(r)
+
+        // parse json body
+        decoder := json.NewDecoder(r.Body)
+        req := &amp;model.WalletUpdateRequest{}
+        err := decoder.Decode(req)
+
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">amount := req.Balance
+
+        response, err := c.service.UpdateWalletByUsername(username, amount)
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">json, err := json.Marshal(response)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
+        w.Write(json)</span>
+}
+
+func NewController(service service.IWalletsService) IController <span class="cov8" title="1">{
+        return &amp;Controller{service: service}
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package data
+
+import (
+        "fmt"
+)
+
+type Wallet struct {
+        Username string
+        Balance  int
+}
+
+type Data struct {
+        wallets []*Wallet
+}
+
+type IData interface {
+        GetAllWallets() ([]*Wallet, error)
+        GetWallet(username string) (*Wallet, error)
+        AddWallet(username string, initialBalanceAmount int) (*Wallet, error)
+        Update(username string, amount int) (*Wallet, error)
+        NewWallet(wallet *Wallet)
+}
+
+func (d *Data) NewWallet(wallet *Wallet) <span class="cov8" title="1">{
+        d.wallets = append(d.wallets, wallet)
+}</span>
+
+func (d *Data) GetAllWallets() ([]*Wallet, error) <span class="cov8" title="1">{
+        return d.wallets, nil
+}</span>
+
+func (d *Data) GetWallet(username string) (*Wallet, error) <span class="cov8" title="1">{
+        for _, u := range d.wallets </span><span class="cov8" title="1">{
+                if u.Username == username </span><span class="cov8" title="1">{
+                        return u, nil
+                }</span>
+        }
+        <span class="cov8" title="1">return &amp;Wallet{}, fmt.Errorf("user with ID '%v' not found", username)</span>
+}
+
+func (d *Data) AddWallet(username string, initialBalanceAmount int) (*Wallet, error) <span class="cov8" title="1">{
+        newWallet := Wallet{Username: username, Balance: initialBalanceAmount}
+        d.wallets = append(d.wallets, &amp;newWallet)
+        return d.GetWallet(username)
+}</span>
+
+func (d *Data) Update(username string, amount int) (*Wallet, error) <span class="cov8" title="1">{
+        for _, u := range d.wallets </span><span class="cov8" title="1">{
+                if u.Username == username </span><span class="cov8" title="1">{
+                        u.Balance += amount
+                }</span>
+        }
+        <span class="cov8" title="1">return d.GetWallet(username)</span>
+}
+
+func NewData() IData <span class="cov8" title="1">{
+        // inMemoryDB
+        DB := []*Wallet{}
+        return &amp;Data{wallets: DB}
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package service
+
+import (
+        "fmt"
+        "week-6-assingment-nidadinch/config"
+        "week-6-assingment-nidadinch/data"
+        "week-6-assingment-nidadinch/model"
+)
+
+type IWalletsService interface {
+        Wallets() (*model.WalletsResponse, error)
+        GetWalletByUsername(username string) (*model.WalletsResponse, error)
+        CreateWalletByUsername(username string) (*model.WalletsResponse, error)
+        UpdateWalletByUsername(username string, amount int) (*model.WalletsResponse, error)
+}
+
+type WalletsService struct {
+        Data data.IData
+}
+
+var conf = config.Get()
+
+func (s *WalletsService) Wallets() (*model.WalletsResponse, error) <span class="cov8" title="1">{
+        wallets, err := s.Data.GetAllWallets()
+
+        m := model.WalletsResponse{}
+        for _, v := range wallets </span><span class="cov8" title="1">{
+                m[v.Username] = v.Balance
+        }</span>
+
+        <span class="cov8" title="1">return &amp;m, err</span>
+}
+
+func (s *WalletsService) GetWalletByUsername(username string) (*model.WalletsResponse, error) <span class="cov8" title="1">{
+
+        wallet, _ := s.Data.GetWallet(username)
+
+        m := model.WalletsResponse{}
+        m[wallet.Username] = wallet.Balance
+
+        return &amp;m, nil
+}</span>
+func (s *WalletsService) CreateWalletByUsername(username string) (*model.WalletsResponse, error) <span class="cov8" title="1">{
+        wallet, _ := s.Data.AddWallet(username, conf.InitialBalanceAmount)
+
+        m := model.WalletsResponse{}
+        m[wallet.Username] = wallet.Balance
+
+        return &amp;m, nil
+}</span>
+
+func (s *WalletsService) UpdateWalletByUsername(username string, amount int) (*model.WalletsResponse, error) <span class="cov8" title="1">{
+
+        wallet, _ := s.Data.GetWallet(username)
+
+        if conf.MinumumBalanceAmount &lt;= wallet.Balance+amount </span><span class="cov8" title="1">{
+                wallet, _ = s.Data.Update(username, amount)
+        }</span> else<span class="cov8" title="1"> {
+                return nil, fmt.Errorf("wallet balance can not be less than '%v'", conf.MinumumBalanceAmount)
+        }</span>
+
+        <span class="cov8" title="1">m := model.WalletsResponse{}
+        m[wallet.Username] = wallet.Balance
+
+        return &amp;m, nil</span>
+}
+
+func NewService(data data.IData) IWalletsService <span class="cov8" title="1">{
+        return &amp;WalletsService{Data: data}
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -9,28 +9,28 @@ type Wallet struct {
 	Balance  int
 }
 
-// inMemoryDB
-var wallets []*Wallet
-
-type Data struct{}
+type Data struct {
+	wallets []*Wallet
+}
 
 type IData interface {
 	GetAllWallets() ([]*Wallet, error)
 	GetWallet(username string) (*Wallet, error)
 	AddWallet(username string, initialBalanceAmount int) (*Wallet, error)
 	Update(username string, amount int) (*Wallet, error)
+	NewWallet(wallet *Wallet)
+}
+
+func (d *Data) NewWallet(wallet *Wallet) {
+	d.wallets = append(d.wallets, wallet)
 }
 
 func (d *Data) GetAllWallets() ([]*Wallet, error) {
-	nida := Wallet{}
-	nida.Username = "Nida"
-	nida.Balance = 2001
-	wallets = append(wallets, &nida)
-	return wallets, nil
+	return d.wallets, nil
 }
 
 func (d *Data) GetWallet(username string) (*Wallet, error) {
-	for _, u := range wallets {
+	for _, u := range d.wallets {
 		if u.Username == username {
 			return u, nil
 		}
@@ -40,20 +40,21 @@ func (d *Data) GetWallet(username string) (*Wallet, error) {
 
 func (d *Data) AddWallet(username string, initialBalanceAmount int) (*Wallet, error) {
 	newWallet := Wallet{Username: username, Balance: initialBalanceAmount}
-	wallets = append(wallets, &newWallet)
+	d.wallets = append(d.wallets, &newWallet)
 	return d.GetWallet(username)
 }
 
 func (d *Data) Update(username string, amount int) (*Wallet, error) {
-	for _, u := range wallets {
+	for _, u := range d.wallets {
 		if u.Username == username {
 			u.Balance += amount
 		}
 	}
-
 	return d.GetWallet(username)
 }
 
 func NewData() IData {
-	return &Data{}
+	// inMemoryDB
+	DB := []*Wallet{}
+	return &Data{wallets: DB}
 }
